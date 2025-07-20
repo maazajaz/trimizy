@@ -1,4 +1,3 @@
-
 # Trimizy Client
 
 India’s #1 Barber Booking App (React Native + Expo)
