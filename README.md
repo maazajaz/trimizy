@@ -1,50 +1,162 @@
-# Welcome to your Expo app 👋
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+# Trimizy Client
 
-## Get started
+India’s #1 Barber Booking App (React Native + Expo)
 
-1. Install dependencies
+---
 
-   ```bash
-   npm install
-   ```
+## Overview
+Trimizy is a modern mobile application for booking barber appointments, built with React Native and Expo. It features secure phone authentication (OTP via Firebase), Google Maps integration for address selection, and a beautiful, responsive UI. This project is designed for both development and production use, with all sensitive keys managed securely via environment variables.
 
-2. Start the app
+---
 
-   ```bash
-   npx expo start
-   ```
+## Features
+- 📱 **React Native + Expo**: Cross-platform mobile app (iOS & Android)
+- 🔒 **Firebase Phone Auth**: Secure OTP-based login
+- 🗺️ **Google Maps Integration**: Address search and geolocation
+- 🗝️ **Environment Variables**: All API keys and secrets are hidden
+- 🧑‍💼 **User Context**: Global state for user and address management
+- 🧪 **Dev Mode**: Skip login and use mock OTP for fast testing
 
-In the output, you'll find options to open the app in a
+---
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+## Getting Started
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+### 1. Prerequisites
+- Node.js (18+ recommended)
+- Yarn or npm
+- Expo CLI (`npm install -g expo-cli`)
+- Firebase project (for phone auth)
+- Google Cloud project (for Maps API)
 
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
+### 2. Clone the Repository
+```sh
+git clone https://github.com/maazajaz/trimizy.git
+cd trimizy/trimizy-client
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+### 3. Install Dependencies
+```sh
+yarn install
+# or
+npm install
+```
 
-## Learn more
+### 4. Configure Environment Variables
+Create a `.env` file in the root of `trimizy-client`:
 
-To learn more about developing your project with Expo, look at the following resources:
+```
+EXPO_PUBLIC_FIREBASE_API_KEY=your_firebase_api_key
+EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN=your_firebase_auth_domain
+EXPO_PUBLIC_FIREBASE_PROJECT_ID=your_firebase_project_id
+EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET=your_firebase_storage_bucket
+EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_firebase_messaging_sender_id
+EXPO_PUBLIC_FIREBASE_APP_ID=your_firebase_app_id
+EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID=your_firebase_measurement_id
+EXPO_PUBLIC_GOOGLE_MAPS_API_KEY=your_google_maps_api_key
+```
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+> **Note:** Never commit your `.env` file. It is already in `.gitignore`.
 
-## Join the community
+### 5. Configure `app.json`
+Ensure all environment variables are injected into Expo's `extra` config in `app.json`:
+```json
+{
+  "expo": {
+    ...,
+    "extra": {
+      "firebaseApiKey": "${EXPO_PUBLIC_FIREBASE_API_KEY}",
+      ...
+      "googleMapsApiKey": "${EXPO_PUBLIC_GOOGLE_MAPS_API_KEY}"
+    }
+  }
+}
+```
 
-Join our community of developers creating universal apps.
+### 6. Start the App
+```sh
+# Start Expo
+npx expo start
+# Or with yarn
+yarn start
+```
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+- Scan the QR code with Expo Go (for quick dev testing)
+- For production, build a standalone app with EAS Build
+
+---
+
+## Usage
+
+### Phone Authentication (OTP)
+- Enter your phone number and tap "Continue"
+- Complete the reCAPTCHA challenge
+- Enter the OTP sent to your phone
+- In development, you can use `123456` as a mock OTP
+
+### Address Selection
+- Use the address screens to search and select your location
+- Google Maps API is used for geocoding and address lookup
+
+### Dev Mode
+- In development (`__DEV__`), you can skip login or use the mock OTP for faster testing
+
+---
+
+## Project Structure
+```
+trimizy-client/
+├── app/                # Main app screens (login, OTP, address, tabs)
+├── components/         # Reusable UI components
+├── constants/          # Colors, dummy data
+├── hooks/              # Custom React hooks
+├── scripts/            # Utility scripts
+├── firebaseConfig.ts   # Firebase & Google Maps config
+├── auth.context.tsx    # User/auth context provider
+├── package.json
+├── app.json            # Expo config
+├── .env                # Environment variables (not committed)
+```
+
+---
+
+## Security
+- All API keys are loaded from environment variables
+- `.env` is in `.gitignore` and never committed
+- Never expose secrets in the codebase
+
+---
+
+## Troubleshooting
+- **OTP not working?**
+  - Make sure you use the latest OTP sent to your device
+  - Do not reload or navigate away between sending and verifying OTP
+  - If using Expo Go, try a development build for more reliable phone auth
+- **Google Maps not working?**
+  - Check your API key and billing status in Google Cloud
+- **Other issues?**
+  - Check the console logs for debug output
+
+---
+
+## Contributing
+Pull requests are welcome! For major changes, please open an issue first to discuss what you would like to change.
+
+---
+
+## License
+[MIT](../LICENSE)
+
+---
+
+## Author
+- [maazajaz](https://github.com/maazajaz)
+- [My Portfolio](https://maazajaz.com)
+
+---
+
+## Acknowledgements
+- [Expo](https://expo.dev/)
+- [Firebase](https://firebase.google.com/)
+- [Google Maps Platform](https://cloud.google.com/maps-platform)
+- [React Native](https://reactnative.dev/)
