@@ -1,4 +1,5 @@
-import { onAuthStateChanged, signOut, User } from 'firebase/auth';
+import type { User } from 'firebase/auth';
+import { onAuthStateChanged, signOut } from 'firebase/auth';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { auth } from './firebaseConfig';
 
@@ -81,7 +82,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser: User | null) => {
       setUser(firebaseUser);
       if (firebaseUser) {
         // In a real app, you'd load user-specific addresses and their last selected location from DB here.
