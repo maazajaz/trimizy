@@ -76,70 +76,55 @@ export default function LoginScreen() {
       return;
     }
     setLoading(true);
-    
-    if (true) {
-        try {
-            if (!recaptchaVerifier.current) {
-                Alert.alert('Error', 'RecaptchaVerifier is not initialized.');
-                setLoading(false);
-                return;
-            }
-            
-            console.log("Attempting to get reCAPTCHA token directly via verifier ref...");
-            const recaptchaToken = await recaptchaVerifier.current.verify();
-
-            if (!recaptchaToken) {
-                Alert.alert("Verification Failed", "reCAPTCHA token could not be obtained.");
-                setLoading(false);
-                return;
-            }
-            console.log("reCAPTCHA token obtained:", recaptchaToken.substring(0, 10) + "...");
-
-            console.log("Attempting signInWithPhoneNumber for:", fullPhone);
-            const confirmation = await auth.signInWithPhoneNumber(
-                fullPhone,
-                recaptchaVerifier.current
-            );
-            console.log("signInWithPhoneNumber successful! Confirmation object:", confirmation);
-
-            setAuthConfirm(confirmation);
-            Alert.alert('OTP sent');
-            router.push({ pathname: '/OtpVerificationScreen', params: { phone: fullPhone } });
-        } catch (err: any) {
-            console.error("Error sending OTP:", err);
-            let errorMessage = 'Failed to send OTP.';
-            if (err.code) {
-                if (err.code === 'auth/missing-client-identifier') {
-                    errorMessage = 'Firebase reCAPTCHA client identifier missing. Check your firebaseConfig or app.json scheme.';
-                } else if (err.code === 'auth/web-storage-unsupported') {
-                    errorMessage = 'Web storage unsupported. Check browser settings.';
-                } else if (err.code === 'auth/network-request-failed') {
-                    errorMessage = 'Network error. Check internet connection.';
-                } else if (err.code === 'auth/quota-exceeded') {
-                    errorMessage = 'SMS quota exceeded. Try again later.';
-                } else if (err.code === 'auth/app-not-authorized') {
-                    errorMessage = 'App not authorized. Check authorized domains in Firebase.';
-                } else if (err.code === 'auth/too-many-requests') {
-                    errorMessage = 'Too many requests. Try again later.';
-                } else if (err.message && err.message.includes('reCAPTCHA')) {
-                    errorMessage = 'reCAPTCHA verification failed or was canceled.';
-                } else if (err.code === 'auth/invalid-phone-number') {
-                    errorMessage = 'Invalid phone number format.';
-                } else if (err.code === 'auth/invalid-verification-code') {
-                    errorMessage = 'Invalid verification code. This should not happen at sendOTP stage.';
-                } else if (err.code === 'auth/user-disabled') {
-                    errorMessage = 'User account has been disabled.';
-                } else if (err.code === 'auth/captcha-check-failed') {
-                    errorMessage = 'reCAPTCHA check failed. Try again.';
-                }
-                errorMessage = `${errorMessage} (${err.code.replace('auth/', '')})`; 
-            } else {
-                errorMessage = err.message || 'An unknown error occurred.';
-            }
-            Alert.alert('Error', errorMessage);
-        } finally {
-            setLoading(false);
+    try {
+      if (!recaptchaVerifier.current) {
+        Alert.alert('Error', 'RecaptchaVerifier is not initialized.');
+        setLoading(false);
+        return;
+      }
+      console.log("Attempting signInWithPhoneNumber for:", fullPhone);
+      const confirmation = await auth.signInWithPhoneNumber(
+        fullPhone,
+        recaptchaVerifier.current
+      );
+      console.log("signInWithPhoneNumber successful! Confirmation object:", confirmation);
+      setAuthConfirm(confirmation);
+      Alert.alert('OTP sent');
+      router.push({ pathname: '/OtpVerificationScreen', params: { phone: fullPhone } });
+    } catch (err: any) {
+      console.error("Error sending OTP:", err);
+      let errorMessage = 'Failed to send OTP.';
+      if (err.code) {
+        if (err.code === 'auth/missing-client-identifier') {
+          errorMessage = 'Firebase reCAPTCHA client identifier missing. Check your firebaseConfig or app.json scheme.';
+        } else if (err.code === 'auth/web-storage-unsupported') {
+          errorMessage = 'Web storage unsupported. Check browser settings.';
+        } else if (err.code === 'auth/network-request-failed') {
+          errorMessage = 'Network error. Check internet connection.';
+        } else if (err.code === 'auth/quota-exceeded') {
+          errorMessage = 'SMS quota exceeded. Try again later.';
+        } else if (err.code === 'auth/app-not-authorized') {
+          errorMessage = 'App not authorized. Check authorized domains in Firebase.';
+        } else if (err.code === 'auth/too-many-requests') {
+          errorMessage = 'Too many requests. Try again later.';
+        } else if (err.message && err.message.includes('reCAPTCHA')) {
+          errorMessage = 'reCAPTCHA verification failed or was canceled.';
+        } else if (err.code === 'auth/invalid-phone-number') {
+          errorMessage = 'Invalid phone number format.';
+        } else if (err.code === 'auth/invalid-verification-code') {
+          errorMessage = 'Invalid verification code. This should not happen at sendOTP stage.';
+        } else if (err.code === 'auth/user-disabled') {
+          errorMessage = 'User account has been disabled.';
+        } else if (err.code === 'auth/captcha-check-failed') {
+          errorMessage = 'reCAPTCHA check failed. Try again.';
         }
+        errorMessage = `${errorMessage} (${err.code.replace('auth/', '')})`;
+      } else {
+        errorMessage = err.message || 'An unknown error occurred.';
+      }
+      Alert.alert('Error', errorMessage);
+    } finally {
+      setLoading(false);
     }
   };
 

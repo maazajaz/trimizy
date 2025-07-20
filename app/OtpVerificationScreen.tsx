@@ -51,8 +51,8 @@ export default function OtpVerificationScreen() {
     console.log("handleVerify called. OTP:", otp, "Confirm object BEFORE verification:", confirm);
     // --- END DEBUG LOG ---
 
-    if (__DEV__) {
-      if (otp === '123456') {
+    // Modified __DEV__ logic to allow both mock and real OTP in dev mode
+    if (__DEV__ && otp === '123456') { // If in DEV and mock OTP is entered, use mock user
         const mockUser = {
           uid: 'dev-user-123',
           phoneNumber: phone,
@@ -60,47 +60,42 @@ export default function OtpVerificationScreen() {
         };
         setUser(mockUser);
         router.replace('/');
-      } else {
-        Alert.alert('Invalid OTP');
-      }
-      setLoading(false);
-      return;
+        setLoading(false);
+        return;
     }
 
     try {
-      if (!confirm) {
+      if (!confirm || typeof confirm.confirm !== 'function') {
+        console.error('Confirmation object is missing or invalid:', confirm);
         Alert.alert('Error', 'Confirmation object not found. Please try logging in again.');
+        setLoading(false);
         return;
       }
-      
+
       const result = await confirm.confirm(otp);
+      if (!result || !result.user) {
+        throw new Error('No user returned from confirmation.');
+      }
       setUser(result.user);
       router.replace('/');
     } catch (err: any) {
       console.error("Error verifying OTP:", err);
-      Alert.alert('Invalid OTP', err.message || 'The verification code entered is invalid.');
+      Alert.alert('Invalid OTP', err?.message || 'The verification code entered is invalid.');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSkipLogin = () => {
-    const mockUser = {
-      uid: 'dev-user-123',
-      phoneNumber: '+911234567890',
-      displayName: 'Test User',
-    };
-    setUser(mockUser);
-    router.replace('/');
-  };
+  // Removed handleSkipLogin as it's redundant with the dev login in login.tsx
 
   return (
     <View style={styles.container}>
-      {__DEV__ && (
+      {/* Keeping __DEV__ skip button if it exists in parent, but this component's skip button is removed */}
+      {/* Removed: __DEV__ && (
         <TouchableOpacity style={styles.devSkipButton} onPress={handleSkipLogin}>
           <Text style={styles.devSkipText}>Skip Login</Text>
         </TouchableOpacity>
-      )}
+      ) */}
 
       <Text style={styles.heading}>OTP Verification</Text>
       <Text style={styles.subheading}>
