@@ -38,7 +38,8 @@ export default function LocationScreen() {
 
       // Fetch from Google Geocoding API
       const response = await axios.get(
-        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${coords.latitude},${coords.longitude}&key=AIzaSyCa9xyUpRWSIW-zLuwWwmg324ysIvI2YM8`
+        // Here's the change to use the environment variable
+        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${coords.latitude},${coords.longitude}&key=${process.env.EXPO_PUBLIC_GOOGLE_MAP_API_KEY}`
       );
 
       const results = response.data.results;
