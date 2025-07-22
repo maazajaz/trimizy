@@ -4,7 +4,6 @@ import {
   ActivityIndicator,
   Alert,
   Keyboard,
-  Platform,
   StyleSheet,
   Text,
   TextInput,
@@ -16,17 +15,12 @@ import { useAuth } from '../auth.context';
 export default function OtpVerificationScreen() {
   const router = useRouter();
   const { phone } = useLocalSearchParams<{ phone: string }>();
-  const { setUser, confirm } = useAuth(); // Destructure confirm from useAuth
+  const { setUser, confirm } = useAuth();
   const [otp, setOtp] = useState('');
   const [countdown, setCountdown] = useState(30);
   const [loading, setLoading] = useState(false);
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-
-  // --- START DEBUG LOG ---
-  console.log("OtpVerificationScreen rendered. Initial confirm object:", confirm);
-  // --- END DEBUG LOG ---
-
 
   useEffect(() => {
     timerRef.current = setInterval(() => {
@@ -47,26 +41,20 @@ export default function OtpVerificationScreen() {
     Keyboard.dismiss();
     setLoading(true);
 
-    // --- START DEBUG LOG ---
-    console.log("handleVerify called. OTP:", otp, "Confirm object BEFORE verification:", confirm);
-    // --- END DEBUG LOG ---
-
-    // Modified __DEV__ logic to allow both mock and real OTP in dev mode
-    if (__DEV__ && otp === '123456') { // If in DEV and mock OTP is entered, use mock user
+    if (__DEV__ && otp === '123456') {
         const mockUser = {
           uid: 'dev-user-123',
           phoneNumber: phone,
           displayName: 'Test User',
         };
-        setUser(mockUser);
-        router.replace('/');
+        // In dev mode, we assume the user is new for testing purposes
+        router.replace({ pathname: '/UserDetailsScreen', params: { uid: mockUser.uid, phone: mockUser.phoneNumber } });
         setLoading(false);
         return;
     }
 
     try {
       if (!confirm || typeof confirm.confirm !== 'function') {
-        console.error('Confirmation object is missing or invalid:', confirm);
         Alert.alert('Error', 'Confirmation object not found. Please try logging in again.');
         setLoading(false);
         return;
@@ -76,8 +64,19 @@ export default function OtpVerificationScreen() {
       if (!result || !result.user) {
         throw new Error('No user returned from confirmation.');
       }
-      setUser(result.user);
-      router.replace('/');
+
+      // Check if the user is new
+      const isNewUser = result.additionalUserInfo?.isNewUser;
+
+      if (isNewUser) {
+        // Redirect to UserDetailsScreen for new users
+        router.replace({ pathname: '/UserDetailsScreen', params: { uid: result.user.uid, phone: result.user.phoneNumber } });
+      } else {
+        // For existing users, set the user and navigate to the home screen
+        setUser(result.user);
+        router.replace('/');
+      }
+
     } catch (err: any) {
       console.error("Error verifying OTP:", err);
       Alert.alert('Invalid OTP', err?.message || 'The verification code entered is invalid.');
@@ -86,17 +85,8 @@ export default function OtpVerificationScreen() {
     }
   };
 
-  // Removed handleSkipLogin as it's redundant with the dev login in login.tsx
-
   return (
     <View style={styles.container}>
-      {/* Keeping __DEV__ skip button if it exists in parent, but this component's skip button is removed */}
-      {/* Removed: __DEV__ && (
-        <TouchableOpacity style={styles.devSkipButton} onPress={handleSkipLogin}>
-          <Text style={styles.devSkipText}>Skip Login</Text>
-        </TouchableOpacity>
-      ) */}
-
       <Text style={styles.heading}>OTP Verification</Text>
       <Text style={styles.subheading}>
         We have sent a verification code to {phone}
@@ -227,25 +217,5 @@ const styles = StyleSheet.create({
     color: '#8c52ff',
     fontSize: 14,
     fontWeight: '500',
-  },
-  devSkipButton: {
-    position: 'absolute',
-    top: Platform.OS === 'ios' ? 50 : 30,
-    right: 16,
-    backgroundColor: '#4CAF50',
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 20,
-    zIndex: 10,
-    elevation: 5,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 3,
-  },
-  devSkipText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 13,
   },
 });
