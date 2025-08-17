@@ -1,8 +1,6 @@
-import {
-  FirebaseRecaptchaVerifierModal,
-} from 'expo-firebase-recaptcha';
+// Using native @react-native-firebase/auth (no web reCAPTCHA modal)
 import { useRouter } from 'expo-router';
-import { User } from 'firebase/auth';
+import type { User } from 'firebase/auth';
 import React, { useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
@@ -32,7 +30,8 @@ export default function LoginScreen() {
   const [otpLoading, setOtpLoading] = useState(false);
   const [countryCode, setCountryCode] = useState<CountryCode>('IN');
   const [callingCode, setCallingCode] = useState('91');
-  const recaptchaVerifier = useRef<FirebaseRecaptchaVerifierModal>(null);
+  // native auth() is used directly; no recaptcha modal ref required
+  // const recaptchaVerifier = useRef<FirebaseRecaptchaVerifierModal>(null);
   const bannerHeight = useRef(new Animated.Value(300)).current;
 
   useEffect(() => {
@@ -75,24 +74,21 @@ export default function LoginScreen() {
       Alert.alert('Error', 'Invalid phone format');
       return;
     }
+    // Validate Firebase config at runtime; missing web config can still indicate a misconfiguration
+    if (!firebaseConfigExport?.apiKey || !firebaseConfigExport?.appId) {
+      console.warn('[login] Warning: firebase web config may be missing (this is okay for native flows if you have native google-services files).', firebaseConfigExport);
+    }
     setLoading(true);
     try {
-      if (!recaptchaVerifier.current) {
-        Alert.alert('Error', 'RecaptchaVerifier is not initialized.');
-        setLoading(false);
-        return;
-      }
-      console.log("Attempting signInWithPhoneNumber for:", fullPhone);
-      const confirmation = await auth.signInWithPhoneNumber(
-        fullPhone,
-        recaptchaVerifier.current
-      );
-      console.log("signInWithPhoneNumber successful! Confirmation object:", confirmation);
+  console.log('[login] Attempting native auth().signInWithPhoneNumber for:', fullPhone);
+  // Using native @react-native-firebase/auth API
+  const confirmation = await auth().signInWithPhoneNumber(fullPhone);
+      console.log('[login] signInWithPhoneNumber successful! Has confirm():', typeof confirmation?.confirm === 'function');
       setAuthConfirm(confirmation);
       Alert.alert('OTP sent');
       router.push({ pathname: '/OtpVerificationScreen', params: { phone: fullPhone } });
     } catch (err: any) {
-      console.error("Error sending OTP:", err);
+      console.error('[login] Error sending OTP:', err);
       let errorMessage = 'Failed to send OTP.';
       if (err.code) {
         if (err.code === 'auth/missing-client-identifier') {
@@ -122,7 +118,7 @@ export default function LoginScreen() {
       } else {
         errorMessage = err.message || 'An unknown error occurred.';
       }
-      Alert.alert('Error', errorMessage);
+  Alert.alert('Error', errorMessage);
     } finally {
       setLoading(false);
     }
@@ -143,14 +139,7 @@ export default function LoginScreen() {
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <View style={[styles.container, { paddingTop: 0 }]}> 
-        <FirebaseRecaptchaVerifierModal
-          ref={recaptchaVerifier}
-          firebaseConfig={firebaseConfigExport}
-          title="Verify you are not a robot"
-          cancelLabel="Close"
-          attemptInvisibleVerification={false} 
-        />
+  <View style={[styles.container, { paddingTop: 0 }]}> 
 
         <Animated.View style={[styles.header, { height: bannerHeight }]}>
           <Image
