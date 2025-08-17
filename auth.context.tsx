@@ -1,7 +1,9 @@
 import type { User } from 'firebase/auth';
-import { onAuthStateChanged, signOut } from 'firebase/auth';
 import React, { createContext, useContext, useEffect, useState } from 'react';
+// Using native @react-native-firebase/auth; auth is exported from firebaseConfig
 import { auth } from './firebaseConfig';
+// ...existing code...
+// (Note: we'll call auth() methods directly below)
 
 // Define a type for a saved address
 export type SavedAddress = {
@@ -82,11 +84,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser: User | null) => {
-      setUser(firebaseUser);
+    const unsubscribe = auth().onAuthStateChanged((firebaseUser: User | null) => {
+      setUser(firebaseUser as any);
       if (firebaseUser) {
         // In a real app, you'd load user-specific addresses and their last selected location from DB here.
-        // For demonstration, we handle initial selection when adding an address.
       } else {
         setSavedAddresses([]); // Clear addresses on logout
         setSelectedLocation(null); // Clear selected location on logout
@@ -97,7 +98,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = async () => {
     try {
-      await signOut(auth);
+      await auth().signOut();
       setUser(null);
       setSavedAddresses([]); // Clear addresses on logout
       setSelectedLocation(null); // Clear selected location on logout
