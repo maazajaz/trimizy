@@ -1,5 +1,8 @@
+import { Service, services } from '@/constants/servicesData';
 import { Ionicons } from '@expo/vector-icons';
-import { useLocalSearchParams, useNavigation } from 'expo-router';
+import Entypo from '@expo/vector-icons/Entypo';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Animated,
@@ -18,15 +21,6 @@ import {
 const windowHeight = Dimensions.get('window').height;
 const HEADER_CHANGE_THRESHOLD = windowHeight * 0.73 - 110 - 60 - 50;
 
-type Service = {
-  id: string;
-  name: string;
-  description: string;
-  price: string;
-  originalPrice: string;
-  image: string;
-};
-
 type CartItem = Service & { quantity: number };
 
 const BANNER_HEIGHT = 78;
@@ -34,10 +28,53 @@ const BANNER_HEIGHT = 78;
 export default function ShopDetail() {
   const { name, location, price, rating, image } = useLocalSearchParams();
   const navigation = useNavigation();
+  const router = useRouter();
 
+  const shopName = name as string; // Get shop name for cart identification
   const [isHeaderWhite, setIsHeaderWhite] = useState(false);
   const [cart, setCart] = useState<CartItem[]>([]);
   const slideAnim = useRef(new Animated.Value(1)).current;
+
+  // Load cart from AsyncStorage on component mount
+  useEffect(() => {
+    const loadCart = async () => {
+      try {
+        const cartKey = `cart_${shopName}`;
+        const savedCart = await AsyncStorage.getItem(cartKey);
+        if (savedCart) {
+          setCart(JSON.parse(savedCart));
+        }
+      } catch (error) {
+        console.error('Error loading cart:', error);
+      }
+    };
+
+    if (shopName) {
+      loadCart();
+    }
+  }, [shopName]);
+
+  // Save cart to AsyncStorage whenever cart changes
+  useEffect(() => {
+    const saveCart = async () => {
+      try {
+        if (shopName) {
+          const cartKey = `cart_${shopName}`;
+          await AsyncStorage.setItem(cartKey, JSON.stringify(cart));
+        }
+      } catch (error) {
+        console.error('Error saving cart:', error);
+      }
+    };
+
+    if (cart.length > 0 && shopName) {
+      saveCart();
+    } else if (shopName) {
+      // Clear AsyncStorage if cart is empty
+      const cartKey = `cart_${shopName}`;
+      AsyncStorage.removeItem(cartKey);
+    }
+  }, [cart, shopName]);
 
   useEffect(() => {
     Animated.timing(slideAnim, {
@@ -46,49 +83,6 @@ export default function ShopDetail() {
       useNativeDriver: false,
     }).start();
   }, [cart.length]);
-
-  const services: Service[] = [
-    {
-      id: 'item1',
-      name: 'Fade Cut',
-      description: 'A stylish fade, from skin fade to taper. Clean and sharp.',
-      price: '250',
-      originalPrice: '300',
-      image: 'https://placehold.co/120x120.png?text=Fade+Cut',
-    },
-    {
-      id: 'item2',
-      name: 'Beard Trim & Shape',
-      description: 'Expert shaping and trimming to keep your beard looking its best.',
-      price: '150',
-      originalPrice: '200',
-      image: 'https://placehold.co/120x120.png?text=Beard+Trim',
-    },
-    {
-      id: 'item3',
-      name: 'Head Massage (15 min)',
-      description: 'A relaxing champi-style head massage to relieve stress.',
-      price: '200',
-      originalPrice: '250',
-      image: 'https://placehold.co/120x120.png?text=Massage',
-    },
-    {
-      id: 'item4',
-      name: 'Classic "Army" Cut',
-      description: 'A timeless, no-nonsense short haircut for a sharp look.',
-      price: '180',
-      originalPrice: '220',
-      image: 'https://placehold.co/120x120.png?text=Army+Cut',
-    },
-    {
-      id: 'item5',
-      name: 'Royal Shave',
-      description: 'A traditional hot towel shave for an exceptionally smooth finish.',
-      price: '300',
-      originalPrice: '350',
-      image: 'https://placehold.co/120x120.png?text=Shave',
-    },
-  ];
 
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     const scrollY = event.nativeEvent.contentOffset.y;
@@ -126,20 +120,29 @@ export default function ShopDetail() {
     });
   };
 
-  const { totalItems, totalSavings } = useMemo(() => {
+  const { totalItems, subTotal } = useMemo(() => {
     return cart.reduce(
       (acc, item) => {
         const originalPrice = parseInt(item.originalPrice, 10);
         const currentPrice = parseInt(item.price, 10);
         acc.totalItems += item.quantity;
-        acc.totalSavings += (originalPrice - currentPrice) * item.quantity;
+        acc.subTotal += currentPrice * item.quantity;
         return acc;
       },
-      { totalItems: 0, totalSavings: 0 }
+      { totalItems: 0, subTotal: 0 }
     );
   }, [cart]);
 
-  // This object now only contains the styles that are actually animated
+  const handleProceedToCheckout = () => {
+    router.push({
+      pathname: '/checkout',
+      params: {
+        cart: JSON.stringify(cart),
+        shopName: name as string,
+      },
+    });
+  };
+
   const animatedBannerStyle = {
     height: slideAnim.interpolate({
       inputRange: [0, 1],
@@ -223,14 +226,13 @@ export default function ShopDetail() {
           {services.map((item) => {
             const itemInCart = cart.find((cartItem) => cartItem.id === item.id);
             const quantity = itemInCart ? itemInCart.quantity : 0;
-
             return (
               <View key={item.id} style={styles.serviceItem}>
                 <View style={styles.serviceTextContent}>
                   <Text style={styles.serviceName}>{item.name}</Text>
                   <View style={styles.priceContainer}>
-                    <Text style={styles.servicePriceStriked}>&#8377;{item.originalPrice}</Text>
-                    <Text style={styles.servicePrice}>Get for &#8377;{item.price}</Text>
+                    <Text style={styles.servicePriceStriked}>₹{item.originalPrice}</Text>
+                    <Text style={styles.servicePrice}>Get for ₹{item.price}</Text>
                   </View>
                   <Text style={styles.serviceDescription}>{item.description}</Text>
                   <View style={styles.serviceActionsContainer}>
@@ -242,16 +244,15 @@ export default function ShopDetail() {
                     </TouchableOpacity>
                   </View>
                 </View>
-
                 <View style={styles.serviceImageContainer}>
-                  <Image source={{ uri: item.image }} style={styles.serviceImage} />
+                  <Image source={item.image} style={styles.serviceImage} />
                   {quantity === 0 ? (
                     <TouchableOpacity
                       style={styles.addServiceButton}
                       onPress={() => handleAddItem(item)}
                     >
                       <Text style={styles.addServiceButtonText}>ADD</Text>
-                      <Ionicons name="add" size={16} color="red" style={{ marginLeft: 4 }} />
+                      <Ionicons name="add" size={16} color="#8c52ff" style={{ marginLeft: 4 }} />
                     </TouchableOpacity>
                   ) : (
                     <View style={styles.quantityStepper}>
@@ -259,14 +260,14 @@ export default function ShopDetail() {
                         onPress={() => handleRemoveItem(item)}
                         style={styles.stepperButton}
                       >
-                        <Ionicons name="remove" size={16} color="red" />
+                        <Ionicons name="remove" size={16} color="#8c52ff" />
                       </TouchableOpacity>
                       <Text style={styles.quantityText}>{quantity}</Text>
                       <TouchableOpacity
                         onPress={() => handleAddItem(item)}
                         style={styles.stepperButton}
                       >
-                        <Ionicons name="add" size={16} color="red" />
+                        <Ionicons name="add" size={16} color="#8c52ff" />
                       </TouchableOpacity>
                     </View>
                   )}
@@ -286,21 +287,17 @@ export default function ShopDetail() {
               <Text style={styles.bottomSearchText}>Search...</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.menuButton}>
-              <Ionicons name="restaurant-outline" size={20} color="#fff" style={{ marginRight: 6 }} />
-              <Text style={styles.menuButtonText}>Menu</Text>
+              <Entypo name="scissors" size={24} color="white" style={{ marginRight: 6 }} />
+              <Text style={styles.menuButtonText}>Services</Text>
             </TouchableOpacity>
           </View>
-
-          {/* We now apply two styles: the static wrapper style and the dynamic animated style */}
           <Animated.View style={[styles.animatedBannerWrapper, animatedBannerStyle]}>
-            <TouchableOpacity style={styles.cartBanner}>
+            <TouchableOpacity style={styles.cartBanner} onPress={handleProceedToCheckout}>
               <View>
                 <Text style={styles.cartBannerText}>
-                  {totalItems} {totalItems > 1 ? 'items' : 'item'} added
+                  {totalItems} {totalItems > 1 ? 'items' : 'item'} | ₹{subTotal}
                 </Text>
-                <Text style={styles.cartBannerSubText}>
-                  FLAT 50% OFF applied! You are saving &#8377;{totalSavings}
-                </Text>
+                <Text style={styles.cartBannerSubText}>Proceed to checkout</Text>
               </View>
               <Ionicons name="arrow-forward" size={24} color="#fff" />
             </TouchableOpacity>
@@ -319,7 +316,7 @@ const styles = StyleSheet.create({
   scrollViewContent: {
     flexGrow: 1,
     paddingTop: 0,
-    paddingBottom: 150,
+    paddingBottom: 80,
   },
   bottomSafeArea: {
     position: 'absolute',
@@ -331,22 +328,20 @@ const styles = StyleSheet.create({
   bottomContainer: {
     backgroundColor: '#fff',
     shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: -4,
-    },
+    shadowOffset: { width: 0, height: -4 },
     shadowOpacity: 0.1,
     shadowRadius: 4.65,
     elevation: 8,
+    paddingBottom: 0,
+    paddingTop: 10,
   },
   bottomBar: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 16,
-    paddingTop: 10,
+    paddingVertical: 10,
     backgroundColor: '#fff',
-    marginTop: 15,
-    marginBottom: 40,
+    paddingBottom: 20,
   },
   bottomSearchBar: {
     flex: 1,
@@ -375,13 +370,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
-  // This new style holds the static 'overflow' property
   animatedBannerWrapper: {
     overflow: 'hidden',
   },
   cartBanner: {
     height: BANNER_HEIGHT,
-    backgroundColor: '#ef4444',
+    backgroundColor: '#8c52ff',
     paddingHorizontal: 40,
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -616,7 +610,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: '#fff',
     borderWidth: 1,
-    borderColor: '#ffc8c9',
+    borderColor: '#8c52ff',
     borderRadius: 8,
     width: 100,
     paddingVertical: 8,
@@ -627,7 +621,7 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   addServiceButtonText: {
-    color: 'red',
+    color: '#8c52ff',
     fontWeight: '600',
     fontSize: 16,
   },
@@ -642,7 +636,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     backgroundColor: '#fff',
     borderWidth: 1,
-    borderColor: '#ffc8c9',
+    borderColor: '#8c52ff',
     borderRadius: 8,
     width: 100,
     height: 38,
@@ -658,7 +652,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   quantityText: {
-    color: 'red',
+    color: '#8c52ff',
     fontWeight: '600',
     fontSize: 16,
   },

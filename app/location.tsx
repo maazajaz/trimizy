@@ -20,7 +20,7 @@ export default function LocationScreen() {
   const router = useRouter();
   const { savedAddresses, setSelectedLocation } = useAuth(); // Access savedAddresses and setSelectedLocation
 
-  const [currentAddress, setCurrentAddress] = useState('Amrapali Zodiac, Sector 120, Noida');
+  const [currentAddress, setCurrentAddress] = useState('');
   const [loadingLocation, setLoadingLocation] = useState(false);
 
   const fetchCurrentLocation = async () => {
@@ -68,6 +68,22 @@ export default function LocationScreen() {
         .join(', ');
 
       setCurrentAddress(cleanedAddress || 'Unknown location');
+
+      // Create a location object and set it in context
+      const locationData = {
+        id: 'current_location',
+        addressType: society || sublocality || 'Current Location', // Use society or sublocality as the main label
+        fullAddress: [sublocality, locality || area, city, postalCode].filter(Boolean).join(', '),
+        additionalDetails: society && sublocality ? society : '', // Additional details if available
+        receiverName: '',
+        receiverPhone: '',
+        latitude: coords.latitude,
+        longitude: coords.longitude
+      } as SavedAddress;
+
+      // Set the location in context and redirect to home
+      setSelectedLocation(locationData);
+      router.replace('/'); // Navigate back to the home screen
     } catch (error) {
       console.error('Error fetching location:', error);
       Alert.alert('Error', 'Could not fetch your location.');

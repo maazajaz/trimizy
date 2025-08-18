@@ -17,6 +17,7 @@ export type SavedAddress = {
 
 type AuthContextType = {
   user: Partial<User> | null;
+  skippedLogin: boolean; // Flag to indicate if login was skipped
   logout: () => Promise<void>;
   isDev: boolean;
   setUser: (user: Partial<User> | null) => void;
@@ -32,6 +33,7 @@ type AuthContextType = {
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
+  skippedLogin: false, // Default skippedLogin to false
   logout: async () => {},
   isDev: false,
   setUser: () => {},
@@ -56,6 +58,7 @@ export const useAuth = () => {
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<Partial<User> | null>(null);
   const [confirm, setConfirm] = useState<any>(null); // Stores confirmation result
+  const [skippedLogin, setSkippedLogin] = useState(false); // State for skipped login
   const isDev = __DEV__;
 
   // State for saved addresses
@@ -84,13 +87,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser: User | null) => {
       setUser(firebaseUser);
-      if (firebaseUser) {
-        // In a real app, you'd load user-specific addresses and their last selected location from DB here.
-        // For demonstration, we handle initial selection when adding an address.
-      } else {
-        setSavedAddresses([]); // Clear addresses on logout
-        setSelectedLocation(null); // Clear selected location on logout
-      }
+      setSkippedLogin(!firebaseUser); // Set skippedLogin to true if no user is authenticated
     });
     return unsubscribe;
   }, []);
@@ -99,6 +96,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       await signOut(auth);
       setUser(null);
+      setSkippedLogin(true); // Reset skippedLogin on logout
       setSavedAddresses([]); // Clear addresses on logout
       setSelectedLocation(null); // Clear selected location on logout
     } catch (error) {
@@ -110,6 +108,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     <AuthContext.Provider
       value={{
         user,
+        skippedLogin,
         logout,
         isDev,
         setUser,
@@ -125,3 +124,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     </AuthContext.Provider>
   );
 }
+
+type ExtendedUser = Partial<User> & { displayName?: string };
+export { ExtendedUser };
+

@@ -13,7 +13,7 @@
       "config": {
         "googleMapsApiKey": "${EXPO_PUBLIC_GOOGLE_MAP_API_KEY}"
       },
-      "bundleIdentifier": "com.yourcompany.trimizyclient",
+      "bundleIdentifier": "com.yourcompany.trimizyclient.dev",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "CFBundleURLTypes": [
@@ -31,7 +31,7 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.yourcompany.trimizyclient"
+      "package": "com.yourcompany.trimizyclient.dev"
     },
     "web": {
       "bundler": "metro",
