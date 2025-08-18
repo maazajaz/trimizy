@@ -11,10 +11,16 @@ Trimizy is a modern mobile application for booking barber appointments, built wi
 
 ## Features
 - 📱 **React Native + Expo**: Cross-platform mobile app (iOS & Android)
-- 🔒 **Firebase Phone Auth**: Secure OTP-based login
-- 🗺️ **Google Maps Integration**: Address search and geolocation
-- 🗝️ **Environment Variables**: All API keys and secrets are hidden
-- 🧑‍💼 **User Context**: Global state for user and address management
+- 🔒 **Firebase Phone Auth**: Secure OTP-based login with skip option
+- 🗺️ **Google Maps Integration**: Address search, geolocation, and GPS auto-redirect
+- 🛒 **Shopping Cart System**: Multi-shop cart with persistent storage
+- 🏪 **Shop Management**: Browse barbers/salons with ratings and services
+- 💳 **Checkout System**: Complete booking flow with service suggestions
+- 👤 **Profile Management**: User profiles with dynamic avatars
+- 🎯 **Recommendations**: Horizontal scrollable "Recommended for You" section
+- � **Location Services**: GPS-based location detection and nearby shop discovery
+- �🗝️ **Environment Variables**: All API keys and secrets are hidden
+- 🧑‍💼 **User Context**: Global state for user, cart, and address management
 - 🧪 **Dev Mode**: Skip login and use mock OTP for fast testing
 
 ---
@@ -92,10 +98,51 @@ yarn start
 - Complete the reCAPTCHA challenge
 - Enter the OTP sent to your phone
 - In development, you can use `123456` as a mock OTP
+- Option to skip login for quick testing
 
-### Address Selection
-- Use the address screens to search and select your location
-- Google Maps API is used for geocoding and address lookup
+### Shopping & Booking Flow
+1. **Browse Services**: View recommended barbers and nearby shops
+2. **Select Shop**: Choose from various categories (Haircut, Beard, Massage, Combo)
+3. **Add to Cart**: Select services and add them to your cart
+4. **Multi-Shop Support**: Add items from different shops with separate carts
+5. **Checkout**: Review items, see service suggestions, and complete booking
+6. **Floating Cart**: Quick access to cart from any page
+
+### Location Features
+- **Address Selection**: Search and save multiple addresses (Home, Work, etc.)
+- **GPS Detection**: Automatically fetch current location
+- **Auto-Redirect**: Location selection redirects to home page
+- **Nearby Discovery**: Find barbers and salons near your location
+
+### Profile Management
+- **Dynamic Avatars**: Shows user initials or 'T' for Trimizy
+- **Authentication State**: Different UI based on login status
+- **User Settings**: Manage profile and preferences
+
+## Key Screens
+
+### Home Screen (`app/(tabs)/index.tsx`)
+- **Recommended Section**: Horizontal scrollable grid with 2-row layout
+- **Categories**: Filter shops by service type (Haircut, Beard, Massage, etc.)
+- **Barbers Nearby**: Main listing of all available shops
+- **Floating Cart**: Multi-shop cart with horizontal scroll for multiple active carts
+- **Location Header**: Shows current address with quick location change option
+
+### Shop Details (`app/shop/[id].tsx`)
+- **Service Menu**: Browse available services with prices
+- **Add to Cart**: Select services and quantities
+- **Shop Information**: Ratings, location, and contact details
+
+### Checkout (`app/checkout.tsx`)
+- **Cart Review**: See all selected services and quantities
+- **Service Suggestions**: Horizontal scrollable additional services
+- **Total Calculation**: Dynamic pricing with offers
+- **Remove Items**: Quantity controls with auto-removal at zero
+
+### Profile (`app/profile.tsx`)
+- **User Information**: Display name and authentication status
+- **Settings**: App preferences and account management
+- **Logout Option**: Secure sign-out functionality
 
 ### Dev Mode
 - In development (`__DEV__`), you can skip login or use the mock OTP for faster testing
@@ -105,13 +152,29 @@ yarn start
 ## Project Structure
 ```
 trimizy-client/
-├── app/                # Main app screens (login, OTP, address, tabs)
+├── app/                
+│   ├── (tabs)/         # Main tab navigation (home, explore)
+│   ├── booking/        # Booking related screens
+│   ├── location/       # Location and address management
+│   ├── shop/           # Individual shop pages
+│   ├── checkout.tsx    # Cart and checkout functionality
+│   ├── login.tsx       # Phone authentication
+│   ├── profile.tsx     # User profile management
+│   ├── OtpVerificationScreen.tsx
+│   ├── UserDetailsScreen.tsx
+│   └── location.tsx    # Location selection with GPS
 ├── components/         # Reusable UI components
-├── constants/          # Colors, dummy data
+├── constants/          
+│   ├── Colors.ts       # App color scheme
+│   ├── dummyData.ts    # Shop and location data
+│   └── servicesData.ts # Shared services data
 ├── hooks/              # Custom React hooks
 ├── scripts/            # Utility scripts
+├── assets/            
+│   ├── images/         # App icons and graphics
+│   └── fonts/          # Custom fonts
 ├── firebaseConfig.ts   # Firebase & Google Maps config
-├── auth.context.tsx    # User/auth context provider
+├── auth.context.tsx    # User/auth/cart context provider
 ├── package.json
 ├── app.json            # Expo config
 ├── .env                # Environment variables (not committed)
@@ -133,8 +196,19 @@ trimizy-client/
   - If using Expo Go, try a development build for more reliable phone auth
 - **Google Maps not working?**
   - Check your API key and billing status in Google Cloud
+  - Ensure Maps JavaScript API and Geocoding API are enabled
+- **Cart not persisting?**
+  - Cart data is stored using AsyncStorage and should persist across app restarts
+  - Each shop has its own cart to prevent cross-contamination
+- **Location services not working?**
+  - Check device permissions for location access
+  - Ensure Google Geocoding API is enabled and properly configured
+- **Images not loading?**
+  - All shop images use Pexels URLs - check internet connection
+  - Some images may need to be updated if URLs become invalid
 - **Other issues?**
   - Check the console logs for debug output
+  - Clear AsyncStorage if experiencing persistent cart issues
 
 ---
 
