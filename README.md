@@ -10,12 +10,14 @@ Trimizy is a modern mobile application for booking barber appointments, built wi
 ## 📱 App Preview
 
 ### Demo Video
-<video width="320" height="640" controls>
-  <source src="./assets/demo/trimizy-demo.mp4" type="video/mp4">
-  Your browser does not support the video tag.
-</video>
 
-*Demo video showcasing the complete Trimizy app experience - from authentication to booking*
+> **To add your demo video:**
+> 1. Go to any GitHub issue in this repository
+> 2. Drag and drop your `trimizy-demo.mp4` file into a comment
+> 3. GitHub will generate a URL like: `https://github.com/maazajaz/trimizy/assets/USERNAME/VIDEO-ID.mp4`
+> 4. Replace this section with that URL
+> 
+> **Alternatively, the video file is available at:** `./assets/demo/trimizy-demo.mp4`
 
 ### Screenshots
 | Home Screen | Shop Details | Checkout |
