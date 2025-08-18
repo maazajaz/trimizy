@@ -7,6 +7,28 @@ India’s #1 Barber Booking App (React Native + Expo)
 ## Overview
 Trimizy is a modern mobile application for booking barber appointments, built with React Native and Expo. It features secure phone authentication (OTP via Firebase), Google Maps integration for address selection, and a beautiful, responsive UI. This project is designed for both development and production use, with all sensitive keys managed securely via environment variables.
 
+## 📱 App Preview
+
+### Demo Video
+<video width="320" height="640" controls>
+  <source src="./assets/demo/trimizy-demo.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+
+*Demo video showcasing the complete Trimizy app experience - from authentication to booking*
+
+### Screenshots
+| Home Screen | Shop Details | Checkout |
+|-------------|--------------|----------|
+| *Recommended section & nearby barbers* | *Service selection & cart* | *Cart review & suggestions* |
+| 📱 *Coming Soon* | 📱 *Coming Soon* | 📱 *Coming Soon* |
+
+### Key Highlights
+- 🎯 **Smart Recommendations** - Personalized barber suggestions
+- 🛒 **Multi-Shop Cart** - Handle services from different shops
+- 📍 **Location-Based** - Find nearby barbers with GPS
+- 💳 **Smooth Checkout** - Easy booking with service add-ons
+
 ---
 
 ## Features
@@ -209,6 +231,52 @@ trimizy-client/
 - **Other issues?**
   - Check the console logs for debug output
   - Clear AsyncStorage if experiencing persistent cart issues
+
+## 📹 Adding Your Demo Video
+
+### Step 1: Create Demo Video
+Record your app demo showing:
+- **Authentication flow** (Phone OTP + Google login)
+- **Home screen** with recommendations and nearby barbers
+- **Shopping experience** (browse → add to cart → checkout)
+- **Key features** (multi-shop cart, location services, profile)
+
+### Step 2: Prepare Video File
+- **Format**: MP4 (best compatibility)
+- **Duration**: 30-90 seconds for optimal viewing
+- **Resolution**: 720p or 1080p (mobile aspect ratio preferred)
+- **Size**: Keep under 25MB for GitHub
+
+### Step 3: Add Video to Repository
+```bash
+# Create assets/demo folder
+mkdir -p assets/demo
+
+# Add your video file
+cp your-demo-video.mp4 assets/demo/trimizy-demo.mp4
+
+# Commit the video
+git add assets/demo/trimizy-demo.mp4
+git commit -m "Add app demo video"
+git push origin main
+```
+
+### Step 4: Alternative - GitHub Issues Method
+1. Go to any GitHub issue in your repo
+2. Drag and drop your video file into a comment
+3. GitHub will generate a permanent URL like:  
+   `https://github.com/maazajaz/trimizy/assets/USERNAME/VIDEO_ID.mp4`
+4. Replace the video source in README with this URL
+
+### Example Direct Embedding
+```html
+<video width="320" height="640" controls>
+  <source src="https://github.com/maazajaz/trimizy/assets/USERNAME/VIDEO_ID.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+```
+
+The video will play directly in your README without needing external links!
 
 ---
 
