@@ -9,28 +9,11 @@ Trimizy is a modern mobile application for booking barber appointments, built wi
 
 ## 📱 App Preview
 
-### Demo Video (GIF)
+### Demo Video
 
-> **To show direct video preview (no links):**
-> 
-> 1. **Convert your video to GIF** using:
->    - Online: [Ezgif.com](https://ezgif.com/video-to-gif) 
->    - Desktop: [Gifski](https://gif.ski/) (Mac) or [ScreenToGif](https://www.screentogif.com/) (Windows)
-> 
-> 2. **Settings for best quality:**
->    - Duration: 30-60 seconds max
->    - Width: 320-480px (mobile-friendly)
->    - Frame rate: 10-15 fps
->    - Size: Under 10MB
->
-> 3. **Upload GIF to GitHub Issues:**
->    - Create new issue → drag/drop GIF → copy generated URL
->    - Replace this section with: `![App Demo](YOUR-GIF-URL)`
->
-> 4. **Result:** GIF will autoplay directly in README! 🎬
+![Trimizy App Demo](./assets/demo/trimizy-demo.gif)
 
-### Video File
-📹 **Full quality video:** [trimizy-demo.mp4](https://github.com/maazajaz/trimizy/blob/main/assets/demo/trimizy-demo.mp4)
+*Live demo: Complete Trimizy app experience - from authentication to booking*
 
 ### Screenshots
 | Home Screen | Shop Details | Checkout |
